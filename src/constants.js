@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = '0x3DED648eF0f4C056BB44E7c99E9fFCe3fED547Fd'
+export const CONTRACT_ADDRESS = '0xDf6a2872dC39F6c5994944bC224e5CeC82C7ba33'
 
 export const transformCharacterData = (characterData) => {
   return {

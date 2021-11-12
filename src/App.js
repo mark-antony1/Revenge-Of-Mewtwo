@@ -6,6 +6,8 @@ import { CONTRACT_ADDRESS, transformCharacterData } from './constants'
 import { ethers } from 'ethers';
 import './App.css';
 import Arena from './Components/Arena';
+import LoadingIndicator from './Components/LoadingIndicator';
+
 
 
 // Constants
@@ -24,6 +26,7 @@ const App = () => {
 
       if (!ethereum) {
         console.log('Make sure you have MetaMask!');
+        setIsLoading(false);
         return;
       } else {
         console.log('We have the ethereum object', ethereum);
@@ -41,6 +44,8 @@ const App = () => {
     } catch (error) {
       console.log(error)
     }
+    
+    setIsLoading(false);
   };
 
   const connectWalletAction = async () => {
@@ -64,6 +69,7 @@ const App = () => {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     checkIfWalletIsConnected();
   }, []);
 
@@ -86,11 +92,10 @@ const App = () => {
       } else {
         console.log('No character NFT found');
       }
+
+      setIsLoading(false);
     };
   
-    /*
-     * We only want to run this, if we have a connected wallet
-     */
     if (currentAccount) {
       console.log('CurrentAccount:', currentAccount);
       fetchNFTMetadata();
@@ -98,6 +103,10 @@ const App = () => {
   }, [currentAccount]);
 
   const renderContent = () => {
+    if (isLoading) {
+      return <LoadingIndicator />;
+    }
+
     if (!currentAccount) {
       return <div className="connect-wallet-container">
         <img
