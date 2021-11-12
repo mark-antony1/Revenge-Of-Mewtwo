@@ -24,7 +24,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 				await attackTxn.wait();
 				console.log('attackTxn:', attackTxn);
 				setAttackState('hit');
-				
+
 				setShowToast(true);
 				setTimeout(() => {
 					setShowToast(false);
@@ -111,7 +111,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 						gameContract.off('AttackComplete', onAttackComplete);
 				}
 		}
-}, [gameContract]);
+}, [gameContract, setCharacterNFT]);
 
 
   return (
