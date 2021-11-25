@@ -48,10 +48,10 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 	useEffect(() => {
 		const getCharacters = async () => {
 			try {
-				console.log('Getting contract characters to mint');
+				// console.log('Getting contract characters to mint');
 	
 				const charactersTxn = await gameContract.getAllDefaultCharacters();
-				console.log('charactersTxn:', charactersTxn);
+				// console.log('charactersTxn:', charactersTxn);
 	
 				const characters = charactersTxn.map((characterData) =>
 					transformCharacterData(characterData)
@@ -96,7 +96,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 				</div>
 				<img src={character.imageURI} alt={character.name} />
 					<p>HP: {character.hp + ", Defense: " + character.defense + ", Crit Chance: " + character.critChance}</p>
-					<p>{console.log(character)}Move: {character.moveName + ", Damage: " + character.attackDamage}</p>
+					<p>Move: {character.moveName + ", Damage: " + character.attackDamage}</p>
 					<p>{character.name}</p>
 				<button
 					type="button"

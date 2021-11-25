@@ -13,34 +13,40 @@ import LoadingIndicator from './Components/LoadingIndicator';
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+const RINKEBY_NETWORK_ID = '0x4'
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRinkebyNetwork, setIsRinkebyNetwork] = useState(true);
 
 
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
 
-      if (!ethereum) {
-        console.log('Make sure you have MetaMask!');
-        setIsLoading(false);
-        return;
-      } else {
-        console.log('We have the ethereum object', ethereum);
-      }
-
-      const accounts = await ethereum.request({ method: 'eth_accounts' });
-
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log('Found an authorized account:', account);
-        setCurrentAccount(account);
-      } else {
-        console.log('No authorized account found');
-      }
+      if (ethereum) {
+        const chainId = await ethereum.request({ method: 'eth_chainId' });
+        ethereum.on('chainChanged', checkIfWalletIsConnected);
+        if(chainId !== RINKEBY_NETWORK_ID) {
+          setIsRinkebyNetwork(false)
+          setIsLoading(false)
+          setCharacterNFT(null)
+          setCurrentAccount(null)
+          return
+        }
+  
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+  
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          setCurrentAccount(account);
+        } else {
+          console.log('No authorized account found');
+        }
+      } 
+  
     } catch (error) {
       console.log(error)
     }
@@ -61,7 +67,6 @@ const App = () => {
         method: 'eth_requestAccounts',
       });
 
-      console.log('Connected', accounts[0]);
       setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
@@ -76,7 +81,6 @@ const App = () => {
   useEffect(() => {
     const fetchNFTMetadata = async () => {
       console.log('Checking for Character NFT on address:', currentAccount);
-  
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const gameContract = new ethers.Contract(
@@ -102,6 +106,43 @@ const App = () => {
     }
   }, [currentAccount]);
 
+    useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      console.log('Checking for Character NFT on address:', currentAccount);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const gameContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        myEpicGame.abi,
+        signer
+      );
+  
+      const txn = await gameContract.checkIfUserHasNFT();
+      if (txn.name) {
+        console.log('User has character NFT');
+        setCharacterNFT(transformCharacterData(txn));
+      } else {
+        console.log('No character NFT found');
+      }
+
+      setIsLoading(false);
+    };
+  
+    if (currentAccount) {
+      console.log('CurrentAccount:', currentAccount);
+      fetchNFTMetadata();
+    }
+  }, [currentAccount]);
+
+  const renderConnectButtonText = () => {
+    if (!isRinkebyNetwork) {
+      return "Please Connect To Rinkeby"
+    } else {
+      return currentAccount ? "Account " + currentAccount : 'Connect Wallet To Get Started'
+    }
+
+  }
+
   const renderContent = () => {
     if (isLoading) {
       return <LoadingIndicator />;
@@ -110,14 +151,16 @@ const App = () => {
     if (!currentAccount) {
       return <div className="connect-wallet-container">
         <img
-          src="https://64.media.tumblr.com/tumblr_mbia5vdmRd1r1mkubo1_500.gifv"
-          alt="Monty Python Gif"
+          src="http://img02.deviantart.net/5c28/i/2016/222/d/b/my_kanto_pokemon_team_by_pokeminecraftfav-dadf9vu.png"
+          alt="Ash Team Pic"
         />
         <button
+          disabled={!isRinkebyNetwork}
           className="cta-button connect-wallet-button"
+          style={isRinkebyNetwork ? {} : {background: "gray"}}
           onClick={connectWalletAction}
         >
-          {currentAccount ? "Account " + currentAccount : 'Connect Wallet To Get Started'}
+          {renderConnectButtonText()}
         </button>
       </div>
     } else if (currentAccount && !characterNFT){
@@ -131,8 +174,8 @@ const App = () => {
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">⚔️ Metaverse Slayer ⚔️</p>
-          <p className="sub-text">Team up to protect the Metaverse!</p>
+          <p className="header gradient-text">⚔️ Revenge of Mewtwo ⚔️</p>
+          <p className="sub-text">Build up a team to protect the Kanto region from Mewtwo!</p>
           {renderContent()}
         </div>
         <div className="footer-container">
