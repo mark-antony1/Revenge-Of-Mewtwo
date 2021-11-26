@@ -108,7 +108,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   return (
     <div className="select-character-container">
-      <h2>Mint Your Hero. Choose wisely.</h2>
+      <h2>Mint Your Pokemon Team!.</h2>
 			{characters.length > 0 && (
 				<div className="character-grid">{renderCharacters()}</div>
 			)}

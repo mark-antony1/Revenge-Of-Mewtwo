@@ -13,7 +13,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null);
 	const [boss, setBoss] = useState(null);
 	const [attackState, setAttackState] = useState('');
-	const [showToast, setShowToast] = useState(false);
+	const [showToastBoss, setShowToastBoss] = useState(false);
+	const [showToastCharacter, setShowToastCharacter] = useState(false);
+
 
 	const runAttackAction = async () => {
 		try {
@@ -25,10 +27,14 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 				console.log('attackTxn:', attackTxn);
 				setAttackState('hit');
 
-				setShowToast(true);
+				setShowToastBoss(true);
 				setTimeout(() => {
-					setShowToast(false);
-				}, 5000);
+					setShowToastBoss(false);
+					setShowToastCharacter(true);
+					setTimeout(() => {
+						setShowToastCharacter(false);
+					},10000)
+				}, 10000);
 
 			}
 		} catch (error) {
@@ -117,8 +123,19 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   return (
     <div className="arena-container">
 			{boss && characterNFT && (
-				<div id="toast" className={showToast ? 'show' : ''}>
-					<div id="desc">{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+				<div>
+					<div id="toast" className={showToastBoss ? 'show' : ''}>
+						<div id="desc">
+							{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}
+							<div>{boss.hp < characterNFT.attackDamage ? boss.name + " fainted!" : ""}</div>
+						</div>
+					</div>
+					<div id="toast" className={showToastCharacter ? 'show' : ''}>
+						<div id="desc">
+							{`💥 ${characterNFT.name} was hit for ${boss.attackDamage}!`}
+							<div>{characterNFT.hp < boss.attackDamage ? characterNFT.name + " fainted!" : ""}</div>
+						</div>
+					</div>
 				</div>
 			)}
 			{boss && (
@@ -150,7 +167,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 			{characterNFT && (
 				<div className="players-container">
 					<div className="player-container">
-						<h2>Your Character</h2>
+						<h2>Your Team</h2>
 						<div className="player">
 							<div className="image-content">
 								<h2>{characterNFT.name}</h2>
