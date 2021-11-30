@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './SelectCharacter.css';
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
+import { CONTRACT_ADDRESS, transformCharacterData, transformCharacterDatas } from '../../constants';
 import myEpicGame from '../../utils/MyEpicGame.json';
 import LoadingIndicator from '../LoadingIndicator';
 
-const SelectCharacter = ({ setCharacterNFT }) => {
+const SelectCharacter = ({ setCharacterNFTs, setShouldShowSelectCharacters, characterNFTs }) => {
 	const [characters, setCharacters] = useState([]);
   const [gameContract, setGameContract] = useState(null);
 	const [mintingCharacter, setMintingCharacter] = useState(false);
@@ -69,10 +69,14 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 			);
 	
 			if (gameContract && characters.length > 0) {
-				const characterNFT = characters[characterIndex];
-				console.log('CharacterNFT: ', characterNFT);
-				setCharacterNFT(characterNFT);
-				alert(`Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
+				const txn = await gameContract.checkIfUserHasNFTs();
+				console.log("txn", txn)
+				if (txn.length > 0) {
+					console.log('User has character NFT');
+					setCharacterNFTs(transformCharacterDatas(txn));
+				} else {
+					console.log('No NFTs found');
+				}
 			}
 		};
 	
@@ -86,7 +90,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 				gameContract.off('CharacterNFTMinted', onCharacterMint);
 			}
 		};
-	}, [gameContract, characters, setCharacterNFT]);
+	}, [gameContract, characters, setCharacterNFTs]);
 
 	const renderCharacters = () =>
 		characters.map((character, index) => (
@@ -109,21 +113,23 @@ const SelectCharacter = ({ setCharacterNFT }) => {
   return (
     <div className="select-character-container">
       <h2>Mint Your Pokemon Team!.</h2>
+			{mintingCharacter && (
+				<div className="loading">
+					<div className="indicator">
+						<LoadingIndicator />
+						<p>Minting In Progress...</p>
+					</div>
+					<iframe title='title' src="https://giphy.com/embed/e0fBwrA1jHnksgns2e" width="480" height="272" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+				</div>
+			)}
 			{characters.length > 0 && (
 				<div className="character-grid">{renderCharacters()}</div>
 			)}
-			{mintingCharacter && (
-      <div className="loading">
-        <div className="indicator">
-          <LoadingIndicator />
-          <p>Minting In Progress...</p>
-        </div>
-        <img
-          src="https://media2.giphy.com/media/61tYloUgq1eOk/giphy.gif?cid=ecf05e47dg95zbpabxhmhaksvoy8h526f96k4em0ndvx078s&rid=giphy.gif&ct=g"
-          alt="Minting loading indicator"
-        />
-      </div>
-    )}
+			{characterNFTs && characterNFTs.length > 0 &&
+				<button className='cta-button' style={{backgroundColor: '#a200d6', marginTop: '10px'}} onClick={() => setShouldShowSelectCharacters(false)}>
+					Go To Arena
+				</button>
+			}
     </div>
   );
 };
